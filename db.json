@@ -1,0 +1,94 @@
+{
+  "vehicles": [
+    {
+      "id": "1",
+      "brand": "Toyota",
+      "model": "Avanza",
+      "year": 2020,
+      "price": 180000000,
+      "description": "Kondisi sangat baik, rutin service. Cocok untuk keluarga.",
+      "image": "https://i.pinimg.com/736x/d8/bc/3e/d8bc3e017220938da56fe3a3f4ac7260.jpg",
+      "sellerId": "user1"
+    },
+    {
+      "id": "2",
+      "brand": "Honda",
+      "model": "Civic",
+      "year": 2022,
+      "price": 350000000,
+      "description": "Mobil sporty, kilometer rendah. Fitur lengkap.",
+      "image": "https://via.placeholder.com/300x200?text=Civic",
+      "sellerId": "user2"
+    },
+    {
+      "id": "3",
+      "brand": "Mitsubishi",
+      "model": "Pajero Sport",
+      "year": 2021,
+      "price": 500000000,
+      "description": "SUV tangguh, siap untuk petualangan off-road.",
+      "image": "https://i.pinimg.com/736x/3d/15/59/3d1559bf2202e7817d5e579ad280b110.jpg",
+      "sellerId": "user1"
+    },
+    {
+      "id": "1751373955619",
+      "brand": "Vario",
+      "model": "Matic",
+      "year": 2015,
+      "price": 5000000,
+      "description": "Untuk Luarnya bagus dan mesinya masih mulus tidak ada bunyi sama sekali",
+      "image": "https://i.pinimg.com/736x/35/33/29/353329bc6119cc5684e8234c1c2a543f.jpg",
+      "sellerId": "user1"
+    },
+    {
+      "id": "1751612832418",
+      "brand": "Mercedez-Benz",
+      "model": "Premium",
+      "year": 2020,
+      "price": 200000000,
+      "description": "UNtuk semuanya masih mulu tidak ada minus sama sekaali",
+      "image": "https://i.pinimg.com/736x/88/58/15/885815e57c538485c90e3578bf760aa4.jpg",
+      "sellerId": "user1"
+    },
+    {
+      "id": "1751615494473",
+      "brand": "innova reborn",
+      "model": "matic",
+      "year": 2022,
+      "price": 200000000,
+      "description": "mesin masih mulus untuk baret bagian depan saja",
+      "image": "https://i.pinimg.com/736x/01/92/63/01926384aa0dd594b88baeab531eb113.jpg",
+      "sellerId": "user1"
+    }
+  ],
+  "users": [
+    {
+      "id": "user1",
+      "username": "penjual1",
+      "password": "password123",
+      "role": "seller",
+      "email": "penjual1@example.com"
+    },
+    {
+      "id": "user2",
+      "username": "penjual2",
+      "password": "password123",
+      "role": "seller",
+      "email": "penjual2@example.com"
+    },
+    {
+      "id": "admin",
+      "username": "admin",
+      "password": "admin123",
+      "role": "admin",
+      "email": "admin@example.com"
+    },
+    {
+      "id": "user811636",
+      "username": "putra_27",
+      "email": "putrasuprianto5@gmail.com",
+      "password": "Rush2022",
+      "role": "buyer"
+    }
+  ]
+}
