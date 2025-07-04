@@ -1,4 +1,11 @@
 <template>
+  <div class="video-background">
+    <video autoplay muted loop playsinline>
+      <source src="/videos/fast-and-furious.mp4" type="video/mp4" />
+      Browser kamu tidak mendukung video HTML5.
+    </video>
+  </div>
+  
   <div class="container form-container">
     <h1>Daftar Akun Baru</h1>
     <form @submit.prevent="handleRegister">
@@ -71,17 +78,30 @@ const authStore = useAuthStore();
 
 const syncToJSONServer = async (userData) => {
   try {
-    const res = await fetch(`http://localhost:3001/users?uid=${userData.uid}`);
+    const res = await fetch(`http://localhost:3001/users?email=${userData.email}`);
     const data = await res.json();
+
     if (data.length === 0) {
+      const jsonUser = {
+        id: userData.uid, // gunakan uid sebagai id
+        username: userData.username,
+        email: userData.email,
+        password: userData.password || '', // tambahkan password jika tersedia
+        role: userData.role
+      };
+
       await fetch('http://localhost:3001/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(jsonUser),
       });
+
+      console.log('✅ Disimpan ke JSON Server');
+    } else {
+      console.log('🔁 User sudah ada di JSON Server');
     }
   } catch (err) {
-    console.error('Gagal sync ke JSON Server:', err);
+    console.error('❌ Gagal sync ke JSON Server:', err);
   }
 };
 
@@ -104,15 +124,19 @@ const handleRegister = async () => {
       uid: user.uid,
       username: username.value,
       email: user.email,
+      password: password.value, // penting untuk JSON Server
       role: role.value,
       createdAt: new Date().toISOString(),
     };
 
+    // Simpan ke Firebase Firestore
     await setDoc(doc(db, 'users', user.uid), newUser);
+
+    // Sinkron ke JSON Server
     await syncToJSONServer(newUser);
 
     successMessage.value = 'Pendaftaran berhasil! Silakan login.';
-    console.log('User baru terdaftar:', user);
+    console.log('✅ Firebase user:', user);
 
     setTimeout(() => {
       router.push('/login');
@@ -125,7 +149,7 @@ const handleRegister = async () => {
     } else {
       errorMessage.value = err.message || 'Terjadi kesalahan saat pendaftaran.';
     }
-    console.error('Error registering user:', err);
+    console.error('❌ Error register:', err);
   } finally {
     loading.value = false;
   }
@@ -140,6 +164,7 @@ const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
+
     const userDocRef = doc(db, 'users', user.uid);
     const userSnap = await getDoc(userDocRef);
 
@@ -147,20 +172,28 @@ const signInWithGoogle = async () => {
       uid: user.uid,
       username: user.displayName || user.email.split('@')[0],
       email: user.email,
-      role: role.value,
+      password: '', // Google tidak memberikan password
+      role: role.value || 'buyer',
       createdAt: new Date().toISOString(),
     };
 
+    // Simpan ke Firestore jika belum ada
     if (!userSnap.exists()) {
       await setDoc(userDocRef, newUser);
     }
+
+    // Simpan ke JSON Server
     await syncToJSONServer(newUser);
 
     loginWithFirebase(user, newUser);
     router.push('/');
   } catch (error) {
-    errorMessage.value = error.message || 'Terjadi kesalahan saat daftar dengan Google.';
-    console.error('Error signing in with Google:', error);
+    if (error.code === 'auth/account-exists-with-different-credential') {
+      errorMessage.value = 'Akun dengan email ini sudah ada menggunakan metode login lain.';
+    } else {
+      errorMessage.value = error.message || 'Terjadi kesalahan saat daftar dengan Google.';
+    }
+    console.error('❌ Error signing in with Google:', error);
   } finally {
     loading.value = false;
   }
@@ -209,41 +242,72 @@ const signInWithFacebook = async () => {
 
 
 <style scoped>
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.video-background video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.4);
+}
+
+/* Container transparan dan neon glow */
 .form-container {
   max-width: 450px;
-  margin: 30px auto;
-  padding: 30px;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  margin: 50px auto;
+  padding: 35px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #0ff;
+  border-radius: 16px;
+  box-shadow: 0 0 25px #0ff, 0 0 40px #0ff2;
+  backdrop-filter: blur(8px);
+  color: #fff;
 }
+
 h1 {
   text-align: center;
-  color: #333;
+  color: #0ff;
   margin-bottom: 30px;
+  text-shadow: 0 0 10px #0ff;
 }
+
 .form-group {
   margin-bottom: 20px;
 }
+
 .form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
-  color: #555;
+  color: #ccc;
 }
+
 .form-control {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid #0ff;
   border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
   font-size: 1em;
   box-sizing: border-box;
   transition: border-color 0.2s ease;
 }
+
 .form-control:focus {
-  border-color: #007bff;
+  border-color: #00ffff;
   outline: none;
 }
+
+/* Tombol daftar */
 .btn {
   padding: 12px 25px;
   border: none;
@@ -252,45 +316,54 @@ h1 {
   font-size: 1.1em;
   transition: background-color 0.3s ease, opacity 0.3s ease;
 }
+
 .btn-primary {
-  background-color: #28a745;
-  color: white;
+  background-color: #0ff;
+  color: #000;
   width: 100%;
-  margin-top: 10px; /* Jarak dari form group terakhir */
+  margin-top: 10px;
+  font-weight: bold;
 }
+
 .btn-primary:hover:not(:disabled) {
-  background-color: #218838;
+  background-color: #00d4d4;
 }
+
 .btn:disabled {
-  background-color: #cccccc;
+  background-color: #444;
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
 }
+
 .success-message {
-  color: #28a745;
+  color: #00ff88;
   text-align: center;
   margin-top: 20px;
   font-weight: bold;
 }
+
 .error-message {
-  color: red;
+  color: #ff4a4a;
   text-align: center;
   margin-top: 20px;
   font-weight: bold;
 }
+
 p {
   text-align: center;
   margin-top: 20px;
 }
+
 p a {
-  color: #007bff;
+  color: #00ffff;
   text-decoration: none;
 }
+
 p a:hover {
   text-decoration: underline;
 }
 
-/* Styling untuk Social Login */
+/* Divider dan social login */
 .social-login-options {
   margin-top: 30px;
   text-align: center;
@@ -299,7 +372,7 @@ p a:hover {
 .divider {
   position: relative;
   height: 1px;
-  background-color: #e0e0e0;
+  background-color: #444;
   margin: 25px 0;
 }
 
@@ -308,9 +381,9 @@ p a:hover {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 0 10px;
-  color: #888;
+  color: #ccc;
   font-size: 0.9em;
 }
 
@@ -326,7 +399,7 @@ p a:hover {
   font-size: 1em;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Tambah bayangan */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .btn-social img {
@@ -336,8 +409,8 @@ p a:hover {
 }
 
 .btn-social.google {
-  background-color: #db4437; /* Warna Google */
-  color: white;
+  background-color: #f6f5f5;
+  color: rgb(21, 21, 21);
 }
 
 .btn-social.google:hover:not(:disabled) {
@@ -345,11 +418,12 @@ p a:hover {
 }
 
 .btn-social.facebook {
-  background-color: #4267b2; /* Warna Facebook */
-  color: white;
+  background-color: #fdfeff;
+  color: rgb(2, 2, 2);
 }
 
 .btn-social.facebook:hover:not(:disabled) {
   background-color: #365899;
 }
+
 </style>

@@ -15,7 +15,9 @@
         <p><strong>Tahun:</strong> {{ vehicle.year }}</p>
         <p><strong>Deskripsi:</strong> {{ vehicle.description }}</p>
         <p class="seller-info">Dijual oleh: {{ sellerUsername }}</p>
-        <button class="btn btn-primary contact-button">Hubungi Penjual</button>
+        <router-link :to="`/chat/${vehicle.id}`" class="btn btn-primary contact-button">
+        Hubungi Penjual</router-link>
+
       </div>
     </div>
     <div v-else class="not-found-message">

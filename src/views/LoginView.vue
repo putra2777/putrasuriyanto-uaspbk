@@ -1,37 +1,39 @@
 <template>
-  <div class="login-container">
-    <div class="login-box">
-      <h1>Login ke Akun Anda</h1>
+  <div class="video-background">
+    <video autoplay muted loop playsinline>
+      <source src="/videos/fast-and-furious.mp4" type="video/mp4" />
+      Browser kamu tidak mendukung video HTML5.
+    </video>
+  </div>
+  <div class="login-page">
+    <div class="form-container">
+      <h2>Login ke Akun Anda</h2>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
-          <label for="username">Username:</label>
-          <input type="text" id="username" v-model="username" required class="form-control" />
+          <label for="email">Email:</label>
+          <input type="email" id="email" v-model="email" class="form-control" required>
         </div>
         <div class="form-group">
           <label for="password">Password:</label>
-          <input type="password" id="password" v-model="password" required class="form-control" />
+          <input type="password" id="password" v-model="password" class="form-control" required>
         </div>
-        <button type="submit" :disabled="loading" class="btn btn-primary">
-          {{ loading ? 'Memuat...' : 'Login' }}
+        <button type="submit" class="btn btn-primary">Login</button>
+
+        <div class="divider"><span>ATAU</span></div>
+
+        <button @click="signInWithGoogle" class="btn btn-social google">
+          <img src="https://cdn-icons-png.flaticon.com/512/281/281764.png" alt="Google" />
+          Login dengan Google
         </button>
-        <p v-if="error" class="error-message">{{ error }}</p>
+        <button @click="signInWithFacebook" class="btn btn-social facebook">
+          <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" />
+          Login dengan Facebook
+        </button>
+
+        <p class="register-link">
+          Belum punya akun? <router-link to="/register">Daftar sekarang</router-link>
+        </p>
       </form>
-
-      <div class="divider"><span>ATAU</span></div>
-
-      <button @click="signInWithGoogle" :disabled="loading" class="btn btn-social google">
-        <img src="https://1000logos.net/wp-content/uploads/2016/11/Google-Symbol-768x480.png" alt="Google Icon" />
-        Login dengan Google
-      </button>
-
-      <button @click="signInWithFacebook" :disabled="loading" class="btn btn-social facebook">
-        <img src="https://www.clipartmax.com/png/full/223-2237173_facebook-messenger-social-media-computer-icons-clip-facebook-f-logo-svg.png" alt="Facebook Icon" />
-        Login dengan Facebook
-      </button>
-
-      <p class="register-text">
-        Belum punya akun? <router-link to="/register">Daftar sekarang</router-link>
-      </p>
     </div>
   </div>
 </template>
@@ -39,144 +41,86 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import { auth, db } from '../firebase';
-import {
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-  signInWithPopup
-} from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
+import { auth } from '@/firebase';
 
-const username = ref('');
+const email = ref('');
 const password = ref('');
-const loading = ref(false);
-const error = ref(null);
 const router = useRouter();
-const authStore = useAuthStore();
-
-const syncToJSONServer = async (userData) => {
-  try {
-    // Cek apakah user sudah ada berdasarkan UID
-    const res = await fetch(`http://localhost:3001/users?uid=${userData.uid}`);
-    const data = await res.json();
-
-    if (data.length === 0) {
-      await fetch('http://localhost:3001/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-    }
-  } catch (err) {
-    console.error('Gagal sync ke JSON Server:', err);
-  }
-};
 
 const handleLogin = async () => {
-  loading.value = true;
-  error.value = null;
   try {
-    await authStore.login(username.value, password.value);
+    await signInWithEmailAndPassword(auth, email.value, password.value);
     router.push('/');
   } catch (err) {
-    error.value = err.message || 'Terjadi kesalahan saat login.';
-  } finally {
-    loading.value = false;
+    alert('Login gagal: ' + err.message);
   }
 };
 
 const signInWithGoogle = async () => {
-  loading.value = true;
-  error.value = null;
   try {
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    const userRef = doc(db, 'users', user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      const newUser = {
-        uid: user.uid,
-        email: user.email,
-        username: user.displayName || user.email.split('@')[0],
-        role: 'buyer',
-        createdAt: new Date().toISOString(),
-      };
-      await setDoc(userRef, newUser);
-      await syncToJSONServer(newUser);
-    } else {
-      await syncToJSONServer(userSnap.data());
-    }
-
+    await signInWithPopup(auth, provider);
     router.push('/');
   } catch (err) {
-    error.value = err.message || 'Login dengan Google gagal.';
-  } finally {
-    loading.value = false;
+    alert('Login dengan Google gagal: ' + err.message);
   }
 };
 
 const signInWithFacebook = async () => {
-  loading.value = true;
-  error.value = null;
   try {
     const provider = new FacebookAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    const userRef = doc(db, 'users', user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      const newUser = {
-        uid: user.uid,
-        email: user.email,
-        username: user.displayName || user.email.split('@')[0],
-        role: 'buyer',
-        createdAt: new Date().toISOString(),
-      };
-      await setDoc(userRef, newUser);
-      await syncToJSONServer(newUser);
-    } else {
-      await syncToJSONServer(userSnap.data());
-    }
-
+    await signInWithPopup(auth, provider);
     router.push('/');
   } catch (err) {
-    error.value = err.message || 'Login dengan Facebook gagal.';
-  } finally {
-    loading.value = false;
+    alert('Login dengan Facebook gagal: ' + err.message);
   }
 };
 </script>
 
 <style scoped>
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 90vh;
-  background: #f0f2f5;
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
 }
 
-.login-box {
-  background-color: #fff;
-  padding: 35px 30px;
-  border-radius: 8px;
+.video-background video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.4); /* Biar form tetap terlihat jelas */
+}
+
+/* Background full screen untuk animasi */
+.login-page {
+  height: 100vh;
+  width: 100%;
+
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Container transparan */
+.form-container {
+  background-color: rgba(0, 0, 0, 0.75);
+  padding: 30px;
+  border-radius: 16px;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 30px #0ff;
+  color: #fff;
 }
 
-h1 {
+h2 {
   text-align: center;
-  margin-bottom: 25px;
-  color: #333;
+  margin-bottom: 20px;
 }
 
 .form-group {
@@ -185,107 +129,102 @@ h1 {
 
 .form-group label {
   display: block;
-  font-weight: 600;
   margin-bottom: 5px;
-  color: #555;
+  color: #0ff;
 }
 
 .form-control {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
+  border: 1px solid #0ff;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.form-control::placeholder {
+  color: #bbb;
 }
 
 .btn {
   width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  font-weight: bold;
+  padding: 12px;
+  border-radius: 6px;
   border: none;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+  font-weight: bold;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .btn-primary {
-  background-color: #007bff;
-  color: white;
+  background-color: #28a745;
+  color: #fff;
 }
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-
-.btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.error-message {
-  color: red;
-  text-align: center;
-  margin-top: 10px;
+.btn-primary:hover {
+  background-color: #218838;
 }
 
 .divider {
-  display: flex;
-  align-items: center;
-  margin: 25px 0 15px;
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
 }
-
-.divider::before,
-.divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #ccc;
-}
-
 .divider span {
-  margin: 0 10px;
-  color: #888;
-  font-weight: bold;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 0 10px;
+  position: relative;
+  z-index: 1;
+  color: #ccc;
+}
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 1px;
+  width: 100%;
+  background-color: #ccc;
+  z-index: 0;
 }
 
 .btn-social {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 10px;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-bottom: 10px;
-}
-
-.btn-social.google {
-  background-color: #db4437;
-  color: white;
-}
-
-.btn-social.google:hover {
-  background-color: #c33d2e;
-}
-
-.btn-social.facebook {
-  background-color: #3b5998;
-  color: white;
-}
-
-.btn-social.facebook:hover {
-  background-color: #2d4373;
+  background-color: #333;
+  color: #fff;
 }
 
 .btn-social img {
   width: 20px;
   height: 20px;
+  margin-right: 10px;
 }
 
-.register-text {
+.btn-social.google {
+  background-color: #f6f5f5;
+  color: rgb(21, 21, 21);
+}
+.btn-social.google:hover {
+  background-color: #c23321;
+}
+
+.btn-social.facebook {
+  background-color: #fdfeff;
+  color: rgb(2, 2, 2);
+}
+.btn-social.facebook:hover {
+  background-color: #2d4373;
+}
+
+.register-link {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 15px;
+}
+
+.register-link a {
+  color: #0ff;
+  text-decoration: underline;
 }
 </style>

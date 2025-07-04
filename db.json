@@ -99,6 +99,20 @@
       "email": "putrasuprianto5@gmail.com",
       "password": "Rush2022",
       "role": "buyer"
+    },
+    {
+      "id": "ExR5aIvzcrOmhLm1lqrBInZN50m2",
+      "username": "ANJAI",
+      "email": "pitut_aye12@gmail.com",
+      "password": "12345678",
+      "role": "buyer"
+    },
+    {
+      "id": "eaPiCzsX40bnzvM9e8VZd6og0od2",
+      "username": "NURUL VITA LIVIAH",
+      "email": "nurulvitaliviah@student.uir.ac.id",
+      "password": "",
+      "role": "buyer"
     }
   ]
 }

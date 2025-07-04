@@ -98,7 +98,8 @@ const featuredVehicles = ref([
             <h3>{{ vehicle.name }}</h3>
             <p class="vehicle-price">{{ vehicle.price }}</p>
             <span class="vehicle-location">{{ vehicle.location }}</span>
-            <button class="btn btn-card">Lihat Detail</button>
+            <router-link :to="`/vehicles/${vehicle.id}`" class="btn btn-card">
+            Lihat Detail</router-link>
           </div>
         </div>
       </div>

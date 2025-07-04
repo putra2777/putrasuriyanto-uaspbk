@@ -41,6 +41,13 @@ const routes = [
     meta: { requiresAuth: true, requiresSeller: true }
   },
   {
+  path: '/chat/:vehicleId',
+  name: 'ChatView',
+  component: () => import('@/views/ChatView.vue'),
+  meta: { requiresAuth: true } // Jika hanya login user boleh chat
+},
+
+{
     path: '/my-vehicles',
     name: 'my-vehicles',
     component: MyVehiclesView,
@@ -92,6 +99,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
 
 // Navigation Guard: Melindungi rute yang memerlukan autentikasi/role tertentu
 router.beforeEach((to, from, next) => {
