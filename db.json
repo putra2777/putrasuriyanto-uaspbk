@@ -59,6 +59,16 @@
       "description": "mesin masih mulus untuk baret bagian depan saja",
       "image": "https://i.pinimg.com/736x/01/92/63/01926384aa0dd594b88baeab531eb113.jpg",
       "sellerId": "user1"
+    },
+    {
+      "id": "1751639614330",
+      "brand": "Vario",
+      "model": "Matic",
+      "year": 2011,
+      "price": 1500000,
+      "description": "udah jelek boros lagi",
+      "image": "https://i.pinimg.com/736x/cf/de/fe/cfdefe3e6a08a493acf82f8467032b1d.jpg",
+      "sellerId": "admin"
     }
   ],
   "users": [
