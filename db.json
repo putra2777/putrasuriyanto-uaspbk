@@ -144,6 +144,13 @@
       "email": "putra08@gmail.com",
       "password": "12345678",
       "role": "seller"
+    },
+    {
+      "id": "Bfxmf8FU82TYcwCYczusazcc60K3",
+      "username": "abdi",
+      "email": "putrasuprianto27@gmail.com",
+      "password": "12345678",
+      "role": "buyer"
     }
   ]
 }
