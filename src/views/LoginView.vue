@@ -5,18 +5,17 @@
       Browser kamu tidak mendukung video HTML5.
     </video>
   </div>
-
   <div class="login-page">
     <div class="form-container">
       <h2>Login ke Akun Anda</h2>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="email">Email:</label>
-          <input type="email" id="email" v-model="email" class="form-control" required />
+          <input type="email" id="email" v-model="email" class="form-control" required>
         </div>
         <div class="form-group">
           <label for="password">Password:</label>
-          <input type="password" id="password" v-model="password" class="form-control" required />
+          <input type="password" id="password" v-model="password" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-primary">Login</button>
 
@@ -42,14 +41,9 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  FacebookAuthProvider
-} from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
 import { auth } from '@/firebase';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/auth'; // pastikan path sesuai
 
 const email = ref('');
 const password = ref('');
@@ -61,21 +55,32 @@ const handleLogin = async () => {
     const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
     const firebaseUser = userCredential.user;
 
-    const res = await fetch(`http://localhost:3001/users?email=${firebaseUser.email}`);
+    // Ambil user dari JSON Server
+   const res = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users?email=${firebaseUser.email}`);
+
+
     const data = await res.json();
 
     if (data.length > 0) {
       const userData = data[0];
+
+      // Simpan ke store
       authStore.user = userData;
       authStore.token = `firebase_token_${firebaseUser.uid}`;
       authStore.isLoggedIn = true;
 
-      router.push(userData.role === 'seller' ? '/dashboard-penjual' : '/dashboard-pembeli');
+      // Arahkan sesuai role
+      if (userData.role === 'seller') {
+        router.push('/dashboard-penjual');
+      } else {
+        router.push('/dashboard-pembeli');
+      }
     } else {
       alert('❌ Data user tidak ditemukan di JSON Server!');
     }
   } catch (err) {
     alert('Login gagal: ' + err.message);
+    console.error('Login error:', err);
   }
 };
 
@@ -85,7 +90,9 @@ const signInWithGoogle = async () => {
     const result = await signInWithPopup(auth, provider);
     const firebaseUser = result.user;
 
-    const res = await fetch(`http://localhost:3001/users?email=${firebaseUser.email}`);
+    // Ambil user dari JSON Server
+    const res = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users?email=${userData.email}`);
+
     const data = await res.json();
 
     if (data.length > 0) {
@@ -94,12 +101,17 @@ const signInWithGoogle = async () => {
       authStore.token = `firebase_token_${firebaseUser.uid}`;
       authStore.isLoggedIn = true;
 
-      router.push(userData.role === 'seller' ? '/dashboard-penjual' : '/dashboard-pembeli');
+      if (userData.role === 'seller') {
+        router.push('/dashboard-penjual');
+      } else {
+        router.push('/dashboard-pembeli');
+      }
     } else {
       alert('❌ Data user tidak ditemukan di JSON Server!');
     }
   } catch (err) {
-    alert('Login Google gagal: ' + err.message);
+    alert('Login dengan Google gagal: ' + err.message);
+    console.error('Google login error:', err);
   }
 };
 
@@ -109,7 +121,8 @@ const signInWithFacebook = async () => {
     const result = await signInWithPopup(auth, provider);
     const firebaseUser = result.user;
 
-    const res = await fetch(`http://localhost:3001/users?email=${firebaseUser.email}`);
+    const res = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users?email=${userData.email}`);
+
     const data = await res.json();
 
     if (data.length > 0) {
@@ -118,15 +131,22 @@ const signInWithFacebook = async () => {
       authStore.token = `firebase_token_${firebaseUser.uid}`;
       authStore.isLoggedIn = true;
 
-      router.push(userData.role === 'seller' ? '/dashboard-penjual' : '/dashboard-pembeli');
+      if (userData.role === 'seller') {
+        router.push('/dashboard-penjual');
+      } else {
+        router.push('/dashboard-pembeli');
+      }
     } else {
       alert('❌ Data user tidak ditemukan di JSON Server!');
     }
   } catch (err) {
-    alert('Login Facebook gagal: ' + err.message);
+    alert('Login dengan Facebook gagal: ' + err.message);
+    console.error('Facebook login error:', err);
   }
 };
 </script>
+
+
 
 <style scoped>
 .video-background {
@@ -143,17 +163,21 @@ const signInWithFacebook = async () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.4);
+  filter: brightness(0.4); /* Biar form tetap terlihat jelas */
 }
 
+/* Background full screen untuk animasi */
 .login-page {
   height: 100vh;
   width: 100%;
+
+  background-size: cover;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* Container transparan */
 .form-container {
   background-color: rgba(0, 0, 0, 0.75);
   padding: 30px;

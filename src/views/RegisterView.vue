@@ -2,48 +2,121 @@
   <div class="video-background">
     <video autoplay muted loop playsinline>
       <source src="/videos/fast-and-furious.mp4" type="video/mp4" />
-      Browser tidak mendukung video HTML5.
+      Browser kamu tidak mendukung video HTML5.
     </video>
   </div>
-
-  <div class="register-page">
+  
+  <div class="container form-container">
+    <h1>Daftar Akun Baru</h1>
     <form @submit.prevent="handleRegister">
-      <h2>Daftar Akun Baru</h2>
-      <input v-model="username" type="text" placeholder="Username" required />
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      <select v-model="role">
-        <option value="buyer">Pembeli</option>
-        <option value="seller">Penjual</option>
-      </select>
-      <button type="submit" :disabled="loading">{{ loading ? 'Mendaftar...' : 'Daftar' }}</button>
-      <p v-if="error" class="error">{{ error }}</p>
-      <p v-if="success" class="success">{{ success }}</p>
-      <p>Sudah punya akun? <router-link to="/login">Login</router-link></p>
+      <div class="form-group">
+        <label for="reg-username">Username:</label>
+        <input type="text" id="reg-username" v-model="username" required class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Email:</label>
+        <input type="email" id="reg-email" v-model="email" required class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Password:</label>
+        <input type="password" id="reg-password" v-model="password" required class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="role">Daftar Sebagai:</label>
+        <select id="role" v-model="role" class="form-control">
+          <option value="buyer">Pembeli</option>
+          <option value="seller">Penjual</option>
+        </select>
+      </div>
+      <button type="submit" :disabled="loading" class="btn btn-primary">
+        {{ loading ? 'Mendaftar...' : 'Daftar Sekarang' }}
+      </button>
+      <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     </form>
+
+    <div class="social-login-options">
+      <div class="divider"><span>ATAU</span></div>
+      <button @click="signInWithGoogle" :disabled="loading" class="btn btn-social google">
+        <img src="https://1000logos.net/wp-content/uploads/2016/11/Google-Symbol-768x480.png" alt="Google Icon">
+        Daftar dengan Google
+      </button>
+      <button @click="signInWithFacebook" :disabled="loading" class="btn btn-social facebook">
+        <img src="https://www.clipartmax.com/png/full/223-2237173_facebook-messenger-social-media-computer-icons-clip-facebook-f-logo-svg.png" alt="Facebook Icon">
+        Daftar dengan Facebook
+      </button>
+    </div>
+
+    <p class="login-link">Sudah punya akun? <router-link to="/login">Login di sini</router-link></p>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '@/firebase';
+import {
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithPopup
+} from 'firebase/auth';
+import {
+  doc, setDoc, getDoc
+} from 'firebase/firestore';
+import { auth, db } from '../firebase';
+import { useAuthStore } from '@/stores/auth';
 
 const username = ref('');
 const email = ref('');
 const password = ref('');
 const role = ref('buyer');
-const error = ref('');
-const success = ref('');
 const loading = ref(false);
+const successMessage = ref('');
+const errorMessage = ref('');
 const router = useRouter();
+const authStore = useAuthStore();
+
+const syncToJSONServer = async (userData) => {
+  try {
+    const res = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users?email=${userData.email}`);
+
+    const data = await res.json();
+
+    if (data.length === 0) {
+      const jsonUser = {
+        id: userData.uid, // gunakan uid sebagai id
+        username: userData.username,
+        email: userData.email,
+        password: userData.password || '', // tambahkan password jika tersedia
+        role: userData.role
+      };
+
+      await fetch('https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jsonUser),
+      });
+
+
+      console.log('✅ Disimpan ke JSON Server');
+    } else {
+      console.log('🔁 User sudah ada di JSON Server');
+    }
+  } catch (err) {
+    console.error('❌ Gagal sync ke JSON Server:', err);
+  }
+};
+
+const loginWithFirebase = (firebaseUser, userData) => {
+  authStore.user = userData;
+  authStore.token = `firebase_token_${firebaseUser.uid}`;
+  authStore.isLoggedIn = true;
+};
 
 const handleRegister = async () => {
-  error.value = '';
-  success.value = '';
   loading.value = true;
+  successMessage.value = '';
+  errorMessage.value = '';
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
@@ -53,23 +126,115 @@ const handleRegister = async () => {
       uid: user.uid,
       username: username.value,
       email: user.email,
+      password: password.value, // penting untuk JSON Server
       role: role.value,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
+    // Simpan ke Firebase Firestore
     await setDoc(doc(db, 'users', user.uid), newUser);
 
-    success.value = 'Berhasil mendaftar! Mengalihkan ke login...';
-    setTimeout(() => router.push('/login'), 2000);
+    // Sinkron ke JSON Server
+    await syncToJSONServer(newUser);
+
+    successMessage.value = 'Pendaftaran berhasil! Silakan login.';
+    console.log('✅ Firebase user:', user);
+
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000);
   } catch (err) {
     if (err.code === 'auth/email-already-in-use') {
-      error.value = 'Email sudah digunakan.';
+      errorMessage.value = 'Email sudah digunakan. Silakan gunakan email lain atau login.';
     } else if (err.code === 'auth/weak-password') {
-      error.value = 'Password terlalu lemah.';
+      errorMessage.value = 'Password terlalu lemah. Minimal 6 karakter.';
     } else {
-      error.value = 'Gagal daftar: ' + err.message;
+      errorMessage.value = err.message || 'Terjadi kesalahan saat pendaftaran.';
     }
-    console.error(err);
+    console.error('❌ Error register:', err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const signInWithGoogle = async () => {
+  loading.value = true;
+  successMessage.value = '';
+  errorMessage.value = '';
+
+  const provider = new GoogleAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    const userDocRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userDocRef);
+
+    const newUser = {
+      uid: user.uid,
+      username: user.displayName || user.email.split('@')[0],
+      email: user.email,
+      password: '', // Google tidak memberikan password
+      role: role.value || 'buyer',
+      createdAt: new Date().toISOString(),
+    };
+
+    // Simpan ke Firestore jika belum ada
+    if (!userSnap.exists()) {
+      await setDoc(userDocRef, newUser);
+    }
+
+    // Simpan ke JSON Server
+    await syncToJSONServer(newUser);
+
+    loginWithFirebase(user, newUser);
+    router.push('/');
+  } catch (error) {
+    if (error.code === 'auth/account-exists-with-different-credential') {
+      errorMessage.value = 'Akun dengan email ini sudah ada menggunakan metode login lain.';
+    } else {
+      errorMessage.value = error.message || 'Terjadi kesalahan saat daftar dengan Google.';
+    }
+    console.error('❌ Error signing in with Google:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const signInWithFacebook = async () => {
+  loading.value = true;
+  successMessage.value = '';
+  errorMessage.value = '';
+
+  const provider = new FacebookAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    const userDocRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userDocRef);
+
+    const newUser = {
+      uid: user.uid,
+      username: user.displayName || user.email.split('@')[0],
+      email: user.email,
+      role: role.value,
+      createdAt: new Date().toISOString(),
+    };
+
+    if (!userSnap.exists()) {
+      await setDoc(userDocRef, newUser);
+    }
+    await syncToJSONServer(newUser);
+
+    loginWithFirebase(user, newUser);
+    router.push('/');
+  } catch (error) {
+    if (error.code === 'auth/account-exists-with-different-credential') {
+      errorMessage.value = 'Akun dengan email ini sudah ada menggunakan metode login lain.';
+    } else {
+      errorMessage.value = error.message || 'Terjadi kesalahan saat daftar dengan Facebook.';
+    }
+    console.error('Error signing in with Facebook:', error);
   } finally {
     loading.value = false;
   }
