@@ -43,40 +43,106 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
 import { auth } from '@/firebase';
+import { useAuthStore } from '@/stores/auth'; // pastikan path sesuai
 
 const email = ref('');
 const password = ref('');
 const router = useRouter();
+const authStore = useAuthStore();
 
 const handleLogin = async () => {
   try {
-    await signInWithEmailAndPassword(auth, email.value, password.value);
-    router.push('/');
+    const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
+    const firebaseUser = userCredential.user;
+
+    // Ambil user dari JSON Server
+    const res = await fetch(`http://localhost:3001/users?email=${firebaseUser.email}`);
+    const data = await res.json();
+
+    if (data.length > 0) {
+      const userData = data[0];
+
+      // Simpan ke store
+      authStore.user = userData;
+      authStore.token = `firebase_token_${firebaseUser.uid}`;
+      authStore.isLoggedIn = true;
+
+      // Arahkan sesuai role
+      if (userData.role === 'seller') {
+        router.push('/dashboard-penjual');
+      } else {
+        router.push('/dashboard-pembeli');
+      }
+    } else {
+      alert('❌ Data user tidak ditemukan di JSON Server!');
+    }
   } catch (err) {
     alert('Login gagal: ' + err.message);
+    console.error('Login error:', err);
   }
 };
 
 const signInWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-    router.push('/');
+    const result = await signInWithPopup(auth, provider);
+    const firebaseUser = result.user;
+
+    // Ambil user dari JSON Server
+    const res = await fetch(`http://localhost:3001/users?email=${firebaseUser.email}`);
+    const data = await res.json();
+
+    if (data.length > 0) {
+      const userData = data[0];
+      authStore.user = userData;
+      authStore.token = `firebase_token_${firebaseUser.uid}`;
+      authStore.isLoggedIn = true;
+
+      if (userData.role === 'seller') {
+        router.push('/dashboard-penjual');
+      } else {
+        router.push('/dashboard-pembeli');
+      }
+    } else {
+      alert('❌ Data user tidak ditemukan di JSON Server!');
+    }
   } catch (err) {
     alert('Login dengan Google gagal: ' + err.message);
+    console.error('Google login error:', err);
   }
 };
 
 const signInWithFacebook = async () => {
   try {
     const provider = new FacebookAuthProvider();
-    await signInWithPopup(auth, provider);
-    router.push('/');
+    const result = await signInWithPopup(auth, provider);
+    const firebaseUser = result.user;
+
+    const res = await fetch(`http://localhost:3001/users?email=${firebaseUser.email}`);
+    const data = await res.json();
+
+    if (data.length > 0) {
+      const userData = data[0];
+      authStore.user = userData;
+      authStore.token = `firebase_token_${firebaseUser.uid}`;
+      authStore.isLoggedIn = true;
+
+      if (userData.role === 'seller') {
+        router.push('/dashboard-penjual');
+      } else {
+        router.push('/dashboard-pembeli');
+      }
+    } else {
+      alert('❌ Data user tidak ditemukan di JSON Server!');
+    }
   } catch (err) {
     alert('Login dengan Facebook gagal: ' + err.message);
+    console.error('Facebook login error:', err);
   }
 };
 </script>
+
+
 
 <style scoped>
 .video-background {

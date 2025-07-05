@@ -22,11 +22,16 @@
     <p v-if="error" class="error-message">{{ error }}</p>
     <div v-else-if="vehicles.length > 0" class="vehicles-grid">
       <div v-for="vehicle in vehicles" :key="vehicle.id" class="vehicle-card">
+      <div class="vehicle-card-content">
         <img :src="vehicle.image" :alt="vehicle.model" class="vehicle-image" />
-        <h3>{{ vehicle.brand }} {{ vehicle.model }} ({{ vehicle.year }})</h3>
-        <p class="price">Harga: Rp {{ formatPrice(vehicle.price) }}</p>
-        <router-link :to="{ name: 'vehicle-detail', params: { id: vehicle.id } }" class="btn btn-detail">Lihat Detail</router-link>
+        <div class="vehicle-info">
+          <h3>{{ vehicle.brand }} {{ vehicle.model }} ({{ vehicle.year }})</h3>
+          <p class="price">Harga: Rp {{ formatPrice(vehicle.price) }}</p>
+          <router-link :to="{ name: 'vehicle-detail', params: { id: vehicle.id } }" class="btn btn-detail">Lihat Detail</router-link>
+        </div>
       </div>
+      </div>
+
     </div>
     <div v-else class="no-vehicles-message">
       <p>Tidak ada kendaraan yang ditemukan dengan kriteria pencarian ini.</p>
@@ -104,18 +109,90 @@ onMounted(fetchVehicles);
 </script>
 
 <style scoped>
-/* Styling yang sudah ada untuk container, vehicles-grid, vehicle-card, dll. */
-/* Tambahkan styling baru untuk filter-controls */
+.vehicles-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
+/* Kartu kendaraan */
+.vehicle-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.vehicle-card:hover {
+  transform: scale(1.01);
+}
+
+/* Konten dalam kartu */
+.vehicle-card-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 15px;
+  gap: 20px;
+}
+
+/* Gambar kendaraan */
+.vehicle-image {
+  width: 180px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Info kendaraan di samping gambar */
+.vehicle-info {
+  flex-grow: 1;
+}
+
+.vehicle-info h3 {
+  margin: 0 0 10px;
+  font-size: 1.2em;
+}
+
+.vehicle-info .price {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Tombol */
+.btn.btn-detail {
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.btn.btn-detail:hover {
+  background-color: #0056b3;
+}
+
+/* Jika tidak ada kendaraan */
+.no-vehicles-message {
+  text-align: center;
+  padding: 50px;
+  color: #555;
+}
+
+/* Form Filter */
 .filter-controls {
   display: flex;
   gap: 15px;
   margin-bottom: 25px;
   justify-content: center;
-  flex-wrap: wrap; /* Agar responsif di layar kecil */
+  flex-wrap: wrap;
 }
 
-.form-control { /* General styling for inputs/selects in forms */
+.form-control {
   padding: 10px 15px;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -124,7 +201,7 @@ onMounted(fetchVehicles);
 }
 
 .search-input {
-  flex-grow: 1; /* Ambil ruang lebih */
+  flex-grow: 1;
   min-width: 200px;
 }
 
@@ -145,6 +222,7 @@ onMounted(fetchVehicles);
   background-color: #007bff;
   color: white;
 }
+
 .btn-filter:hover {
   background-color: #0056b3;
 }
@@ -153,23 +231,9 @@ onMounted(fetchVehicles);
   background-color: #6c757d;
   color: white;
 }
+
 .btn-secondary:hover {
   background-color: #5a6268;
 }
 
-.no-vehicles-message {
-  text-align: center;
-  padding: 50px;
-  color: #555;
-}
-
-/* Override some general .btn styles from App.vue if needed for better fit */
-.btn.btn-detail {
-    background-color: #007bff; /* Example: make sure it's blue */
-    color: white;
-    text-decoration: none;
-}
-.btn.btn-detail:hover {
-    background-color: #0056b3;
-}
 </style>

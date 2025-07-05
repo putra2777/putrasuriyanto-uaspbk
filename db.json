@@ -17,7 +17,7 @@
       "year": 2022,
       "price": 350000000,
       "description": "Mobil sporty, kilometer rendah. Fitur lengkap.",
-      "image": "https://via.placeholder.com/300x200?text=Civic",
+      "image": "https://i.pinimg.com/736x/65/2a/6b/652a6be880ce8baeead08f9a2d0ae181.jpg",
       "sellerId": "user2"
     },
     {
@@ -69,6 +69,16 @@
       "description": "udah jelek boros lagi",
       "image": "https://i.pinimg.com/736x/cf/de/fe/cfdefe3e6a08a493acf82f8467032b1d.jpg",
       "sellerId": "admin"
+    },
+    {
+      "id": "1751732960719",
+      "brand": "Nmax",
+      "model": "Matic",
+      "year": 2000,
+      "price": 5000000,
+      "description": "masihmulus",
+      "image": "https://i.pinimg.com/736x/39/f5/3e/39f53ede5bfc1fe09bae6618eff2de28.jpg",
+      "sellerId": "k3awGHKrT6aDFMTIKLW3w1q1bbf1"
     }
   ],
   "users": [
@@ -113,6 +123,27 @@
       "email": "nurulvitaliviah@student.uir.ac.id",
       "password": "",
       "role": "buyer"
+    },
+    {
+      "id": "FTf2ILJhkSaOR3aOGhTq2vgnA532",
+      "username": "aku putra",
+      "email": "aku@gmail.com",
+      "password": "12345678",
+      "role": "seller"
+    },
+    {
+      "id": "w3yQa7Std8Q3F6JCgC4YQTTqbjz2",
+      "username": "putra",
+      "email": "putrasup2708@gmail.com",
+      "password": "Pekanbaru123",
+      "role": "seller"
+    },
+    {
+      "id": "k3awGHKrT6aDFMTIKLW3w1q1bbf1",
+      "username": "putrasup27",
+      "email": "putra08@gmail.com",
+      "password": "12345678",
+      "role": "seller"
     }
   ]
 }
