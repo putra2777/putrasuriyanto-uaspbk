@@ -76,7 +76,7 @@ const sendUsersToJsonServer = async () => {
   try {
     // Contoh: Mengirim data pengguna yang diambil dari Firestore ke JSON Server Anda
     // Ini hanya contoh, Anda mungkin perlu menyesuaikan endpoint dan metode
-    const response = await fetch('http://localhost:3001/users', {
+    const response = await fetch('https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users', {
       method: 'POST', // Atau 'PUT'/'PATCH' jika memperbarui
       headers: {
         'Content-Type': 'application/json'

@@ -77,7 +77,7 @@ const handleSubmit = async () => {
   };
 
   try {
-    const response = await fetch('http://localhost:3001/vehicles', {
+    const response = await fetch('https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/vehicles', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

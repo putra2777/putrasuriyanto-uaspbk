@@ -71,10 +71,11 @@ const fetchVehicleForEdit = async (id) => {
   loading.value = true;
   error.value = null;
   try {
-    const response = await fetch(`http://localhost:3001/vehicles/${id}`);
+    const response = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/vehicles/${id}`);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
+
     const data = await response.json();
 
     // Validasi apakah user yang login adalah pemilik kendaraan atau admin
@@ -100,7 +101,7 @@ const handleSubmit = async () => {
   errorMessage.value = '';
 
   try {
-    const response = await fetch(`http://localhost:3001/vehicles/${vehicle.value.id}`, {
+    const response = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/vehicles/${vehicle.value.id}`, {
       method: 'PUT', // Menggunakan PUT untuk memperbarui seluruh sumber daya
       headers: {
         'Content-Type': 'application/json'

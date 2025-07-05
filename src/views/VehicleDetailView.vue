@@ -46,7 +46,7 @@ const fetchVehicleDetail = async (id) => {
   sellerUsername.value = 'Memuat...'; // Reset seller info
 
   try {
-    const response = await fetch(`http://localhost:3001/vehicles/${id}`);
+    const response = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/vehicles/${id}`);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -55,7 +55,7 @@ const fetchVehicleDetail = async (id) => {
 
     // Ambil data penjual untuk menampilkan username
     if (vehicle.value.sellerId) {
-      const sellerResponse = await fetch(`http://localhost:3001/users/${vehicle.value.sellerId}`);
+      const sellerResponse = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users/${vehicle.value.sellerId}`);
       if (sellerResponse.ok) {
         const sellerData = await sellerResponse.json();
         sellerUsername.value = sellerData.username || 'Tidak Diketahui';

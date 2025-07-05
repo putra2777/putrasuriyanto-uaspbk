@@ -63,7 +63,7 @@ const fetchMyVehicles = async () => {
   loading.value = true;
   error.value = null;
   try {
-    const response = await fetch('http://localhost:3001/vehicles');
+    const response = await fetch('https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/vehicles');
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
@@ -94,7 +94,7 @@ const deleteVehicle = async () => {
 
   deleting.value = true;
   try {
-    const response = await fetch(`http://localhost:3001/vehicles/${vehicleToDeleteId.value}`, {
+    const response = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/vehicles/${vehicleToDeleteId.value}`, {
       method: 'DELETE',
     });
 

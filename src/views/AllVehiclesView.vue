@@ -60,7 +60,7 @@ const fetchVehicles = async () => {
   error.value = null;
   vehicles.value = []; // Kosongkan dulu
 
-  let url = 'http://localhost:3001/vehicles';
+  let url = 'https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/vehicles';
   const params = new URLSearchParams(); // Untuk membangun query string
 
   // Tambahkan parameter pencarian
