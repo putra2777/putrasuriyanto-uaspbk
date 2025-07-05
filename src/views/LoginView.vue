@@ -25,10 +25,7 @@
           <img src="https://cdn-icons-png.flaticon.com/512/281/281764.png" alt="Google" />
           Login dengan Google
         </button>
-        <button @click="signInWithFacebook" class="btn btn-social facebook">
-          <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" />
-          Login dengan Facebook
-        </button>
+
 
         <p class="register-link">
           Belum punya akun? <router-link to="/register">Daftar sekarang</router-link>
@@ -90,9 +87,7 @@ const signInWithGoogle = async () => {
     const result = await signInWithPopup(auth, provider);
     const firebaseUser = result.user;
 
-    // Ambil user dari JSON Server
-    const res = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users?email=${userData.email}`);
-
+    const res = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users?email=${firebaseUser.email}`);
     const data = await res.json();
 
     if (data.length > 0) {
@@ -115,14 +110,14 @@ const signInWithGoogle = async () => {
   }
 };
 
+
 const signInWithFacebook = async () => {
   try {
     const provider = new FacebookAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const firebaseUser = result.user;
 
-    const res = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users?email=${userData.email}`);
-
+    const res = await fetch(`https://27579367-a44f-4ba7-9bf1-059fc3a3cf64-00-38hegy5ahuasz.worf.replit.dev/users?email=${firebaseUser.email}`);
     const data = await res.json();
 
     if (data.length > 0) {
@@ -144,6 +139,7 @@ const signInWithFacebook = async () => {
     console.error('Facebook login error:', err);
   }
 };
+
 </script>
 
 

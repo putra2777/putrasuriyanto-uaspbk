@@ -41,10 +41,7 @@
         <img src="https://1000logos.net/wp-content/uploads/2016/11/Google-Symbol-768x480.png" alt="Google Icon">
         Daftar dengan Google
       </button>
-      <button @click="signInWithFacebook" :disabled="loading" class="btn btn-social facebook">
-        <img src="https://www.clipartmax.com/png/full/223-2237173_facebook-messenger-social-media-computer-icons-clip-facebook-f-logo-svg.png" alt="Facebook Icon">
-        Daftar dengan Facebook
-      </button>
+
     </div>
 
     <p class="login-link">Sudah punya akun? <router-link to="/login">Login di sini</router-link></p>
